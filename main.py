@@ -1,19 +1,54 @@
 import urllib2
 import json
+from pprint import pprint
+import datetime
 
-
-
-class GEItem(object):
+class Querier(object):
     BASE_URL = 'http://services.runescape.com/m=itemdb_oldschool'
     URL = BASE_URL + '/api/catalogue/detail.json?item='
-    MEMO = {}
 
+
+    def __init__(self):
+        self.idToJSON = {}
+        self.timeoflast = None
+
+    def load(self):
+        with open("ge_data.txt", "r") as inp:
+            d = json.load(inp)
+            self.idToJSON = {int(k) : v for k, v in d['d'].iteritems()}
+            self.timeoflast = d['time']
+
+    def save(self):
+        with open("ge_data.txt", "w") as out:
+            json.dump({"d" : self.idToJSON, "time" : str(datetime.date.today())}, out)
+
+    def reset(self):
+        self.idToJSON = {}
+
+    def query(self, id, retry = 0, force = False):
+        if self.timeoflast != str(datetime.date.today()):
+            force = True
+        if (not force and id in self.idToJSON.keys()):
+            return self.idToJSON[id]
+        if (retry > 15):
+            raise Exception("TIMEOUT")
+        query_target = self.URL + str(id)
+        try:
+            response = urllib2.urlopen(query_target)
+            j = json.load(response)
+        except ValueError:
+            j = self.query(id, retry=retry + 1, force = force)
+        self.idToJSON[id] = j
+        return j
+
+HANDLER = Querier()
+
+class GEItem(object):
     # Constructor for GEItem  - only takes in the JSON data we got from CURL
     def __init__(self, id):
-        self.json = None
+        self.json = HANDLER.query(id)
         self.id = id
-        self.query_target = self.URL + str(id)
-        print str(self.id) + " => " + str(self.refresh())
+        print str(self.id) + " => " + str(self.json)
 
 
     def refresh(self, depth = 0):
@@ -124,8 +159,6 @@ class BirdNest(GEItem):
     def getCurrentPrice(self):
         return super(BirdNest, self).getCurrentPrice() + self._getExpectedValue()
 
-nest = BirdNest()
-
 class KingdomItem(object):
     def __init__(self, itemid_to_yield, name, days = 7):
         self.forcast = {} #assume 7 days
@@ -133,7 +166,7 @@ class KingdomItem(object):
         self.name = name
         for id, y in itemid_to_yield.iteritems():
             if (id == BirdNest.ID):
-                self.forcast[nest] = y
+                self.forcast[BirdNest()] = y
                 continue
             if (type(id) == int):
                 self.forcast[GEItem(id)] = y
@@ -181,9 +214,20 @@ class Kingdom(object):#src http://www.runehq.com/calculator/miscellania-manageme
     def __str__(self):
         return str( [item.name + ": " + str(item.getYield()) for item in self.list] )
 
-kingdom = Kingdom()
-print kingdom
+def main():
+    HANDLER.load()
+    print HANDLER.timeoflast == datetime.date.today()
+    pprint (HANDLER.idToJSON)
 
+    kingdom = Kingdom()
+    print kingdom
+    HANDLER.save()
+    print datetime.date.today()
+
+if __name__ == '__main__':
+    main()
+
+#HANDLER.save()
 
 # END OF CLASS DECLARATION
 
