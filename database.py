@@ -1,5 +1,6 @@
 import sqlite3
 DB_NAME = "Kingdom"
+DB_PATH = "C:\Users\Kyle\PycharmProjects\Kingdom-Rewards-Calculator\Kingdom.db"
 
 CREATE_TABLES_QUERY = """
     CREATE TABLE IF NOT EXISTS """ + DB_NAME + """ (
@@ -27,7 +28,7 @@ INSERT_INTO_KINGDOM_TABLE_QUERY = """
 
 class KingdomDB(object):
     def __init__(self):
-        self.conn = sqlite3.connect("kingdom.db")
+        self.conn = sqlite3.connect(DB_PATH)
 
     def __del__(self):
         self.conn.close()
@@ -43,7 +44,6 @@ class KingdomDB(object):
 if __name__ == '__main__':
     conn = sqlite3.connect("kingdom.db")
     c = conn.cursor()
-    c.execute("drop table if exists Kingdom")
     c.execute(CREATE_TABLES_QUERY)
     c.execute("""
     INSERT INTO Kingdom
