@@ -2,8 +2,10 @@ import urllib2
 import json
 from pprint import pprint
 import datetime
+import sqlite3
+from database import KingdomDB
 
-class Querier(object):
+class ApiHandler(object):
     BASE_URL = 'http://services.runescape.com/m=itemdb_oldschool'
     URL = BASE_URL + '/api/catalogue/detail.json?item='
 
@@ -41,14 +43,14 @@ class Querier(object):
         self.idToJSON[id] = j
         return j
 
-HANDLER = Querier()
+HANDLER = ApiHandler()
 
 class GEItem(object):
     # Constructor for GEItem  - only takes in the JSON data we got from CURL
     def __init__(self, id):
         self.json = HANDLER.query(id)
         self.id = id
-        print str(self.id) + " => " + str(self.json)
+        print str(self.id) + " => "
 
 
     def refresh(self, depth = 0):
@@ -194,35 +196,43 @@ class Kingdom(object):#src http://www.runehq.com/calculator/miscellania-manageme
         Teak = {6333 : 2043, BirdNest.ID : 5}
         Mahog = {6332 : 1387, BirdNest.ID : 3}
         Both = {6333 : 826, 6332 : 826, BirdNest.ID : 4}
-        self.list = [KingdomItem(Trees, "Trees"),
-                     KingdomItem(Coal, "Coal"),
-                     KingdomItem(Fish, "Raw Fish"),
-                     KingdomItem(Cooked, "Cooked Fish"),
-                     KingdomItem(Flax, "Flax"),
-                     KingdomItem(Herb, "Herbs"),
-                     KingdomItem(Teak, "Teak"),
-                     KingdomItem(Mahog, "Mahogany"),
-                     KingdomItem(Both, "Teak + Mahog"),
-                     ]
-        self.list = sorted(self.list, key = KingdomItem.getYield, reverse=True)
+        self.data = {
+            "Maples" : KingdomItem(Trees, "Trees"),
+            "Coal" : KingdomItem(Coal, "Coal"),
+            "Raw_Fish" : KingdomItem(Fish, "Raw Fish"),
+            "Cooked_Fish" : KingdomItem(Cooked, "Cooked Fish"),
+            "Flax" : KingdomItem(Flax, "Flax"),
+            "Herbs" : KingdomItem(Herb, "Herbs"),
+            "Teak" : KingdomItem(Teak, "Teak"),
+            "Mahogany" : KingdomItem(Mahog, "Mahogany"),
+            "Teak_and_Mahog" : KingdomItem(Both, "Teak + Mahog"),
+        }
+
+    def get_insertable(self):
+        return {k : v.getYield() for k,v in self.data.iteritems()}
 
     def refresh(self):
-        for item in self.list:
+        for item in self.data:
             item.refresh()
-        self.list = sorted(self.list, key = KingdomItem.getYield, reverse=True)
+        self.data = sorted(self.data, key = KingdomItem.getYield, reverse=True)
 
     def __str__(self):
-        return str( [item.name + ": " + str(item.getYield()) for item in self.list] )
+        return str( [item.name + ": " + str(item.getYield()) for item in self.data.values()] )
 
 def main():
-    HANDLER.load()
-    print HANDLER.timeoflast == datetime.date.today()
-    pprint (HANDLER.idToJSON)
+    db = KingdomDB()
+    #HANDLER.load()
 
     kingdom = Kingdom()
-    print kingdom
-    HANDLER.save()
+    insertable = kingdom.get_insertable()
+    insertable["date"] = str(datetime.date.today())
+    insertable["Json"] = json.dumps(HANDLER.idToJSON)
+    pprint(insertable)
+    #print kingdom
+    #HANDLER.save()
     print datetime.date.today()
+    db.insert_data(insertable)
+    db.conn.close()
 
 if __name__ == '__main__':
     main()
