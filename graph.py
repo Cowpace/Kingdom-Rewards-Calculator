@@ -1,5 +1,5 @@
 import matplotlib
-from matplotlib import pyplot
+from matplotlib import pyplot #Download this dependency via PIP!
 from database import KingdomDB
 
 def draw_data():
