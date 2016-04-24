@@ -1,9 +1,10 @@
-import sqlite3
-DB_NAME = "Kingdom"
-DB_PATH = "C:\Users\Kyle\PycharmProjects\Kingdom-Rewards-Calculator\Kingdom.db"
+import sqlite3, os
+KINGDOM_TABLE_NAME = "Kingdom"
+FARM_TABLE_NAME = "Farm"
+DB_PATH = "C:\Users\Kyle\PycharmProjects\Kingdom-Rewards-Calculator"
 
 CREATE_TABLES_QUERY = """
-    CREATE TABLE IF NOT EXISTS """ + DB_NAME + """ (
+    CREATE TABLE IF NOT EXISTS """ + KINGDOM_TABLE_NAME + """ (
         id Integer PRIMARY KEY AUTOINCREMENT,
         date text UNIQUE,
         Coal Integer,
@@ -18,12 +19,18 @@ CREATE_TABLES_QUERY = """
         Json text
     )
 
+    CREATE TABLE IF NOT EXISTS """ + FARM_TABLE_NAME + """ (
+        id Integer PRIMARY KEY AUTOINCREMENT,
+        date text UNIQUE,
+        Json text
+    )
+
 """
 
 KINGDOM_TABLE_COL_LIST = ["date", "Coal", "Herbs", "Maples", "Cooked_Fish", "Raw_Fish", "Teak", "Teak_and_Mahog", "Mahogany", "Flax", "Json"]
 
 INSERT_INTO_KINGDOM_TABLE_QUERY = """
-    INSERT INTO """ + DB_NAME + """ ({}) VALUES (?,?,?,?,?,?,?,?,?,?,?)
+    INSERT INTO """ + KINGDOM_TABLE_NAME + """ ({}) VALUES (?,?,?,?,?,?,?,?,?,?,?)
 """
 
 MAIN_KINGDOM_QUERY = """
@@ -33,9 +40,14 @@ MAIN_KINGDOM_QUERY = """
     ORDER BY date asc
 """
 
-class KingdomDB(object):
+class Database(object):
+    """
+    The baseclass for interacting with the SQLite Database
+    """
+    FileName = "\kingdom.db"
     def __init__(self):
-        self.conn = sqlite3.connect(DB_PATH)
+        assert os.path.exists(DB_PATH + self.FileName)
+        self.conn = sqlite3.connect(DB_PATH + self.FileName)
 
     def __del__(self):
         self.conn.close()
@@ -43,12 +55,24 @@ class KingdomDB(object):
     def get_cursor(self):
         return self.conn.cursor()
 
-    def insert_data(self, dict):
-        li = dict.values()
+    def generate_insert_query(self, dict, table_name):
+        cols = dict.keys()
+        vals = "?" * len(dict.values())
+        return """
+            INSERT INTO """ + table_name + """ ({}) VALUES ({})
+        """.format(",".join(cols), ",".join(vals))
+
+    def insert_data(self, dict, table_name):
         c = self.get_cursor()
-        print INSERT_INTO_KINGDOM_TABLE_QUERY.format(",".join(dict.keys()))
-        c.execute(INSERT_INTO_KINGDOM_TABLE_QUERY.format(",".join(dict.keys())), tuple(li))
+        q = self.generate_insert_query(dict, table_name)
+        print q
+        c.execute(q, dict.values())
         self.conn.commit()
+
+class KingdomTable(Database):
+    TableName = KINGDOM_TABLE_NAME
+    def insert_data(self, dict):
+        super(KingdomTable, self).insert_data(dict, self.TableName)
 
     def query_plottable(self, limit = None):
         if (limit is None):
@@ -75,14 +99,15 @@ if __name__ == '__main__':
     conn = sqlite3.connect("kingdom.db")
     c = conn.cursor()
     c.execute(CREATE_TABLES_QUERY)
-    c.execute("""
-    INSERT INTO Kingdom
-    (date, Coal, Maples, Herbs, Cooked_Fish, Raw_Fish, Teak, Teak_and_Mahog, Mahogany, Flax)
-    VALUES ('2016-04-16',974678,916263,704790,597140,562488,376380,354218,335421,84870)""")
-    c.execute("""
-    INSERT INTO Kingdom
-    (date, Coal, Maples, Herbs, Cooked_Fish, Raw_Fish, Teak, Teak_and_Mahog, Mahogany, Flax)
-    VALUES ('2016-04-17',1015444,906603,692900,601620,557708,375575,353574,334938,84870)""")
+
+    #c.execute("""
+    #INSERT INTO Kingdom
+    #(date, Coal, Maples, Herbs, Cooked_Fish, Raw_Fish, Teak, Teak_and_Mahog, Mahogany, Flax)
+    #VALUES ('2016-04-16',974678,916263,704790,597140,562488,376380,354218,335421,84870)""")
+    #c.execute("""
+    #INSERT INTO Kingdom
+    #(date, Coal, Maples, Herbs, Cooked_Fish, Raw_Fish, Teak, Teak_and_Mahog, Mahogany, Flax)
+    #VALUES ('2016-04-17',1015444,906603,692900,601620,557708,375575,353574,334938,84870)""")
 
     conn.commit()
     conn.close()

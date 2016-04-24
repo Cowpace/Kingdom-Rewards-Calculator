@@ -1,14 +1,14 @@
 import matplotlib
 import numpy as np
 from matplotlib import pyplot #Download this dependency via PIP!
-from database import KingdomDB
+from database import KingdomTable
 
 GRAPH_OPTIONS = [c + "o-" for c in "bgrcmyk"] + [c + "^--" for c in "bgrcmyk"]
 
 def draw_data():
     COST = 350000
 
-    db = KingdomDB()
+    db = KingdomTable()
     dict = db.query_plottable()
 
     fig, ax = pyplot.subplots()
@@ -33,7 +33,7 @@ def draw_data():
     print names
     leg = pyplot.legend(loc = "lower left")
     pyplot.draw()
-    pyplot.xticks(np.arange(len(dict["date"])), dict["date"])
+    pyplot.xticks(np.arange(len(dict["date"])), [d[5:] for d in dict["date"]])
     print [item.get_label() for item in ax.get_yticklabels()]
     pyplot.show()
 
