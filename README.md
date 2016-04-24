@@ -13,9 +13,9 @@ TL;DR for people who have played or are playing OSRS / RS3 / Runescape:
       loop/tooth halfs
       other random resources that don't make up a significant portion of profit / I cant find data for
       
-    I do however include birds nests and their expected value based on the prices of seeds you can get from them
+  I do however include birds nests and their expected value based on the prices of seeds you can get from them
     
-    Sources for my data are in the source code for relevent Python objects.
+  Sources for my data are in the source code for relevent Python objects.
     
 TL;DR for people who have played an MMO before:
 
