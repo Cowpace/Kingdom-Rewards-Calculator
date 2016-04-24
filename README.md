@@ -1,6 +1,8 @@
 # Kingdom-Rewards-Calculator
 A calculator that determines the optimal settings for a minigame in the MMORPG Old School RuneScape
 
+You can use/expand on this for your website/own use as long as you credit me in your code/project (like I did in mine! :)) 
+
 # TL;DR for people who have played or are playing OSRS / RS3 / Runescape:
 
   This program collected data from the OSRS GE and stores the value of picking certain options for your Kingdom
