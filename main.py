@@ -55,9 +55,10 @@ class GEItem(object):
         https://www.reddit.com/r/2007scape/comments/3g06rq/guide_using_the_old_school_ge_page_api/
     """
     def __init__(self, id):
+        v = id in HANDLER.idToJSON
         self.json = HANDLER.query(id)
         self.id = id
-        print str(self.id) + " => "
+        print str(self.id) + " => " + str(v)
 
 
     def refresh(self, depth = 0):
@@ -139,7 +140,7 @@ class Herbs(Index):
 
 class BirdNest(GEItem):
     ID = 6693
-    IdToProb = { # src: http://2007.runescape.wikia.com/wiki/Bird_nest
+    SeedProb = { # src: http://2007.runescape.wikia.com/wiki/Bird_nest
         5312 : .203, #Acorn
         5313 : .143, #Willow
         5314 : .059, #Maple
@@ -155,12 +156,26 @@ class BirdNest(GEItem):
         5290 : .022 #Calquat
 
     }
+    RingCount = 21.0
+    RingProb = { #These numbers are from my own data (with a very very small sample size)
+        1635 : 8 / RingCount,#Gold Ring
+        1637 : 6 / RingCount,#Saphhire Ring
+        1639 : 4 / RingCount,#Emerald Ring
+        1641 : 3 / RingCount, #Ruby Ring
+        1643 : 0 / RingCount, #Diamond Ring
+    }
     def __init__(self):
-        super((BirdNest), self).__init__(self.ID)
-        self.items = Index(self.IdToProb)
 
-    def getCurrentPrice(self):
-        return super(BirdNest, self).getCurrentPrice() + self.items.getCurrentPrice()
+        super((BirdNest), self).__init__(self.ID)
+        self.seeds = Index(self.SeedProb)
+        self.rings = Index(self.RingProb)
+
+    def getCurrentPrice(self): #These weights are based on my own sample of 70 nests, 48 were seed nests, 21 ring, and 1 bird egg
+        return int(
+            super(BirdNest, self).getCurrentPrice() + \
+            (self.seeds.getCurrentPrice() * (48.0 / 70.0)) + \
+            (self.rings.getCurrentPrice() * (21.0 / 70.0))
+        )
 
 class KingdomItem(object):
     """
@@ -261,7 +276,7 @@ DB_TEST_CASE = {'Coal': 996914,
  'date': 'TEST_DATE'}
 
 
-def main():
+def process_day():
     db = KingdomTable()
     if not TEST_DB:
         #HANDLER.load()
@@ -279,8 +294,25 @@ def main():
     db.insert_data(insertable)
     db.conn.close()
 
+def fix_maples():
+    db = KingdomTable()
+    c = db.get_cursor()
+    c.execute("SELECT Json, id FROM Kingdom WHERE Maples is NULL and Json is not NULL")
+    rows = c.fetchall()
+    print rows
+    for row in rows:
+        HANDLER.idToJSON = json.loads(row[0])
+        HANDLER.idToJSON = {int(k) : v for k, v in HANDLER.idToJSON.iteritems()}
+
+        maples_val = KingdomItem({1517 : 6051, BirdNest.ID : 60}).getYield()
+
+        c = db.get_cursor()
+        c.execute("UPDATE Kingdom SET Maples = ? WHERE id = ?", [maples_val, row[1]])
+        db.conn.commit()
+
 if __name__ == '__main__':
-    main()
+    process_day()
+    #fix_maples()
 
 #HANDLER.save()
 
