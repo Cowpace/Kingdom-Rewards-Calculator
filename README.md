@@ -5,8 +5,17 @@ TL;DR for people who have played or are playing OSRS / RS3 / Runescape:
 
   This program collected data from the OSRS GE and stores the value of picking certain options for your Kingdom
     management minigame, so you can judge the value of putting all your workers on all resources over time. I don't
-    include the farming resource, because I cant find the data for the seeds generated. Sources for my data are in the 
-    source code for relevent Python objects.
+    include the farming resource, because I cant find the data for the seeds generated. I also dont account for:
+    
+      Gems from mining
+      Herb seeds from the herbs/flax resource
+      caskets from fishing
+      loop/tooth halfs
+      other random resources that don't make up a significant portion of profit / I cant find data for
+      
+    I do however include birds nests and their expected value based on the prices of seeds you can get from them
+    
+    Sources for my data are in the source code for relevent Python objects.
     
 TL;DR for people who have played an MMO before:
 
