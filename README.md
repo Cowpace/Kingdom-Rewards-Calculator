@@ -6,7 +6,7 @@ You can use/expand on this for your website/own use as long as you credit me in 
 # TL;DR for people who have played or are playing OSRS / RS3 / Runescape:
 
   This program collected data from the OSRS GE and stores the value of picking certain options for your Kingdom
-    management minigame, so you can judge the value of putting all your workers on all resources over time. The values that are spat out for each resource are the total gross value based on the day's prices of the resource collected over seven days.
+    management minigame, so you can judge the value of putting all your workers on all resources over time. The values that are calculated out for each resource are the total gross value based on the day's prices of the resource collected over seven days. I assume that you do not maintain your approval rating for these calculations.
     
     Note: This calculator does not account for:
     
