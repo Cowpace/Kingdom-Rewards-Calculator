@@ -228,8 +228,8 @@ class Kingdom(object):
     def __init__(self):
         Trees = {1517 : 6051, BirdNest.ID : 60}
         Coal = {453 : 3706}
-        Fish = {359 : 2988, 371 : 896, 405 : 76}
-        Cooked = {361 : 2988, 373 : 896, 405 : 76}
+        Fish = {359 : 2988, 371 : 896, 405 : 74}
+        Cooked = {361 : 2988, 373 : 896, 405 : 74}
         Flax = {1779 : 8487}
         Herb = {Herbs() : 410}
         Teak = {6333 : 2043, BirdNest.ID : 5}
