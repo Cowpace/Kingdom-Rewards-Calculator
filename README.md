@@ -11,8 +11,7 @@ You can use/expand on this for your website/own use as long as you credit me in 
     
       Gems from mining
       Herb seeds from the herbs/flax resource
-      caskets from fishing
-      loop/tooth halfs
+      Loot from fishing caskets (I just use the GE value of only the casket)
       other random resources that don't make up a significant portion of profit / I cant find data for
       
   I do however include birds nests and their expected value based on the prices of seeds you can get from them
