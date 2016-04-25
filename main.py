@@ -2,7 +2,6 @@ import urllib2
 import json
 from pprint import pprint
 import datetime
-import sqlite3
 from database import KingdomTable
 
 
@@ -58,7 +57,7 @@ class GEItem(object):
         v = id in HANDLER.idToJSON
         self.json = HANDLER.query(id)
         self.id = id
-        print str(self.id) + " => " + str(v)
+        print "(" + str(self.id) + ", " + self.getName() + ", " + str(GEItem.getCurrentPrice(self)) + ")" + " => " + str(v)
 
 
     def refresh(self, depth = 0):
@@ -73,6 +72,9 @@ class GEItem(object):
 
     def getId(self):
         return self.json['item']['id']
+
+    def getName(self):
+        return self.json['item']['name']
 
     def getCurrentTrend(self):
         return self.json['item']['current']['trend']
@@ -156,13 +158,13 @@ class BirdNest(GEItem):
         5290 : .022 #Calquat
 
     }
-    RingCount = 21.0
-    RingProb = { #These numbers are from my own data (with a very very small sample size)
-        1635 : 8 / RingCount,#Gold Ring
-        1637 : 6 / RingCount,#Saphhire Ring
-        1639 : 4 / RingCount,#Emerald Ring
-        1641 : 3 / RingCount, #Ruby Ring
-        1643 : 0 / RingCount, #Diamond Ring
+    RingCount = 1000.0
+    RingProb = { #src : https://www.youtube.com/watch?v=_CBEBcvibhI @ 1:24
+        1635 : 353 / RingCount,#Gold Ring
+        1637 : 410 / RingCount,#Saphhire Ring
+        1639 : 143 / RingCount,#Emerald Ring
+        1641 : 81 / RingCount, #Ruby Ring
+        1643 : 13 / RingCount, #Diamond Ring
     }
     def __init__(self):
 
@@ -226,8 +228,8 @@ class Kingdom(object):
     def __init__(self):
         Trees = {1517 : 6051, BirdNest.ID : 60}
         Coal = {453 : 3706}
-        Fish = {359 : 2988, 371 : 896}
-        Cooked = {361 : 2988, 373 : 896}
+        Fish = {359 : 2988, 371 : 896, 405 : 76}
+        Cooked = {361 : 2988, 373 : 896, 405 : 76}
         Flax = {1779 : 8487}
         Herb = {Herbs() : 410}
         Teak = {6333 : 2043, BirdNest.ID : 5}
@@ -294,25 +296,33 @@ def process_day():
     db.insert_data(insertable)
     db.conn.close()
 
-def fix_maples():
+def recalculate():
     db = KingdomTable()
     c = db.get_cursor()
-    c.execute("SELECT Json, id FROM Kingdom WHERE Maples is NULL and Json is not NULL")
+    c.execute("SELECT Json, id FROM Kingdom WHERE Json is not NULL")
     rows = c.fetchall()
-    print rows
     for row in rows:
         HANDLER.idToJSON = json.loads(row[0])
         HANDLER.idToJSON = {int(k) : v for k, v in HANDLER.idToJSON.iteritems()}
 
-        maples_val = KingdomItem({1517 : 6051, BirdNest.ID : 60}).getYield()
-
+        k = Kingdom()
+        data = k.get_insertable()
         c = db.get_cursor()
-        c.execute("UPDATE Kingdom SET Maples = ? WHERE id = ?", [maples_val, row[1]])
+        query = "UPDATE Kingdom SET "
+        sub_query = []
+        for k in data.keys():
+            sub_query.append(k + " = ?")
+        query += ",".join(sub_query)
+        query += " WHERE id = ?"
+        print query
+        c.execute(query, data.values() + [row[1]])
         db.conn.commit()
 
 if __name__ == '__main__':
+    #b = BirdNest()
+    #print b.getCurrentPrice()
     process_day()
-    #fix_maples()
+    #recalculate()
 
 #HANDLER.save()
 
