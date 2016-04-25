@@ -141,6 +141,10 @@ class Herbs(Index):
         super(Herbs, self).__init__(self.IdToProb)
 
 class BirdNest(GEItem):
+    """
+    Represents a birds nest with a random seed, ring, or bird egg inside, and has a value of
+        both its crushed version and the expected value of whats inside it
+    """
     ID = 6693
     SeedProb = { # src: http://2007.runescape.wikia.com/wiki/Bird_nest
         5312 : .203, #Acorn
@@ -172,11 +176,11 @@ class BirdNest(GEItem):
         self.seeds = Index(self.SeedProb)
         self.rings = Index(self.RingProb)
 
-    def getCurrentPrice(self): #These weights are based on my own sample of 70 nests, 48 were seed nests, 21 ring, and 1 bird egg
+    def getCurrentPrice(self): #src: https://www.youtube.com/watch?v=5-Mpvpp6lWA @ 1:36
         return int(
             super(BirdNest, self).getCurrentPrice() + \
-            (self.seeds.getCurrentPrice() * (48.0 / 70.0)) + \
-            (self.rings.getCurrentPrice() * (21.0 / 70.0))
+            (self.seeds.getCurrentPrice() * (79.0 / 127.0)) + \
+            (self.rings.getCurrentPrice() * (41.0 / 127.0))
         )
 
 class KingdomItem(object):
@@ -319,8 +323,6 @@ def recalculate():
         db.conn.commit()
 
 if __name__ == '__main__':
-    #b = BirdNest()
-    #print b.getCurrentPrice()
     process_day()
     #recalculate()
 
