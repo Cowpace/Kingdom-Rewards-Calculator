@@ -6,9 +6,11 @@ You can use/expand on this for your website/own use as long as you credit me in 
 # TL;DR for people who have played or are playing OSRS / RS3 / Runescape:
 
   This program collected data from the OSRS GE and stores the value of picking certain options for your Kingdom
-    management minigame, so you can judge the value of putting all your workers on all resources over time. I don't
-    include the farming resource, because I cant find the data for the seeds generated. I also dont account for:
+    management minigame, so you can judge the value of putting all your workers on all resources over time. The values that are spat out for each resource are the total gross value based on the day's prices of the resource collected over seven days.
     
+    Note: This calculator does not account for:
+    
+      The farming resource (can't find data)
       Gems from mining
       Herb seeds from the herbs/flax resource
       Loot from fishing caskets (I just use the GE value of only the casket)
